@@ -16,19 +16,19 @@ const sources = [
     //'https://vnexpress.net/rss/the-gioi.rss'
 ];
 const categories = [{
-        code: 'news',
-        title: 'Thời sự'
-    },
-    {
-        code: 'world',
-        title: 'Thế giới'
-    },
+    code: 'news',
+    title: 'Thời sự'
+}, {
+    code: 'world',
+    title: 'Thế giới'
+},
 ];
+const postsPerPage = 6;
 var Post = require('../models/post');
 
 // Mongodb Connection
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/crawler', {
+mongoose.connect('mongodb://localhost:27017/rss', {
     useNewUrlParser: true
 });
 var db = mongoose.connection;
@@ -46,7 +46,7 @@ app.get('/', (req, res) => {
     res.send("Hello World!");
 });
 
-app.post('/update', async (req, res) => {
+app.get('/update', async (req, res) => {
     let parser = new Parser();
     let feeds = [];
     let items = [];
@@ -63,7 +63,7 @@ app.post('/update', async (req, res) => {
     await Promise.all(promises).then((data) => {
         feeds = data;
     });
-    
+
     for (let i = 0; i < feeds.length; i++) {
         let category = categories[0].code;
         for (let j = 0; j < categories.length; j++) {
@@ -118,7 +118,21 @@ app.post('/update', async (req, res) => {
 });
 
 app.get('/news', (req, res) => {
+    const pageNum = req.query.page;
+    const skip = (pageNum - 1) * postsPerPage;
+    const limit = postsPerPage;
+    Post.find()
+        .skip(skip)
+        .limit(limit)
+        .exec(function (err, posts) {
+            var postMap = {};
 
+            posts.forEach(function (post) {
+                postMap[post._id] = post;
+            });
+
+            res.send(posts);
+        });
 });
 
 app.listen(process.env.PORT || 8081);
