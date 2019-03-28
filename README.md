@@ -16,7 +16,7 @@
     $ npm run start
     ```
 ## Usage
-- Start crawling and push data into database
-    ```http://localhost:8081/update```
+- Start crawling and push data into database  
+     ```http://localhost:8081/update```
 - View data  
     ```http://localhost:8080/news```
